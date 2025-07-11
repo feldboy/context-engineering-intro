@@ -1,0 +1,258 @@
+{
+  "complaint_schema": {
+    "fields": [
+      {
+        "name": "plaintiff_name",
+        "type": "string",
+        "description": "Full name of the plaintiff",
+        "required": true
+      },
+      {
+        "name": "defendant_name",
+        "type": "string",
+        "description": "Full name of the defendant",
+        "required": true
+      },
+      {
+        "name": "case_number",
+        "type": "string",
+        "description": "Court case number",
+        "required": true
+      },
+      {
+        "name": "date_filed",
+        "type": "date",
+        "description": "Date the complaint was filed",
+        "required": true
+      },
+      {
+        "name": "court_name",
+        "type": "string",
+        "description": "Name of the court",
+        "required": true
+      },
+      {
+        "name": "incident_date",
+        "type": "date",
+        "description": "Date of the incident",
+        "required": false
+      },
+      {
+        "name": "medical_expenses",
+        "type": "number",
+        "description": "Total medical expenses amount",
+        "required": false
+      },
+      {
+        "name": "damages_sought",
+        "type": "number",
+        "description": "Total damages sought",
+        "required": false
+      },
+      {
+        "name": "attorney_name",
+        "type": "string",
+        "description": "Name of plaintiff's attorney",
+        "required": false
+      },
+      {
+        "name": "attorney_firm",
+        "type": "string",
+        "description": "Name of attorney's law firm",
+        "required": false
+      }
+    ]
+  },
+  "retainer_agreement_schema": {
+    "fields": [
+      {
+        "name": "client_name",
+        "type": "string",
+        "description": "Full name of the client",
+        "required": true
+      },
+      {
+        "name": "attorney_name",
+        "type": "string",
+        "description": "Name of the attorney",
+        "required": true
+      },
+      {
+        "name": "law_firm_name",
+        "type": "string",
+        "description": "Name of the law firm",
+        "required": true
+      },
+      {
+        "name": "agreement_date",
+        "type": "date",
+        "description": "Date the retainer agreement was signed",
+        "required": true
+      },
+      {
+        "name": "contingency_fee_percentage",
+        "type": "number",
+        "description": "Contingency fee percentage",
+        "required": true
+      },
+      {
+        "name": "case_description",
+        "type": "string",
+        "description": "Brief description of the case",
+        "required": false
+      },
+      {
+        "name": "client_signature_date",
+        "type": "date",
+        "description": "Date client signed the agreement",
+        "required": false
+      },
+      {
+        "name": "attorney_signature_date",
+        "type": "date",
+        "description": "Date attorney signed the agreement",
+        "required": false
+      }
+    ]
+  },
+  "medical_records_schema": {
+    "fields": [
+      {
+        "name": "patient_name",
+        "type": "string",
+        "description": "Full name of the patient",
+        "required": true
+      },
+      {
+        "name": "patient_dob",
+        "type": "date",
+        "description": "Patient's date of birth",
+        "required": true
+      },
+      {
+        "name": "medical_record_number",
+        "type": "string",
+        "description": "Medical record number",
+        "required": true
+      },
+      {
+        "name": "date_of_service",
+        "type": "date",
+        "description": "Date of medical service",
+        "required": true
+      },
+      {
+        "name": "provider_name",
+        "type": "string",
+        "description": "Name of the healthcare provider",
+        "required": true
+      },
+      {
+        "name": "diagnosis",
+        "type": "string",
+        "description": "Primary diagnosis",
+        "required": false
+      },
+      {
+        "name": "treatment_description",
+        "type": "string",
+        "description": "Description of treatment provided",
+        "required": false
+      },
+      {
+        "name": "total_charges",
+        "type": "number",
+        "description": "Total charges for services",
+        "required": false
+      },
+      {
+        "name": "insurance_coverage",
+        "type": "string",
+        "description": "Insurance coverage information",
+        "required": false
+      }
+    ]
+  },
+  "insurance_claim_schema": {
+    "fields": [
+      {
+        "name": "claim_number",
+        "type": "string",
+        "description": "Insurance claim number",
+        "required": true
+      },
+      {
+        "name": "policy_number",
+        "type": "string",
+        "description": "Insurance policy number",
+        "required": true
+      },
+      {
+        "name": "policyholder_name",
+        "type": "string",
+        "description": "Name of the policyholder",
+        "required": true
+      },
+      {
+        "name": "claim_date",
+        "type": "date",
+        "description": "Date the claim was filed",
+        "required": true
+      },
+      {
+        "name": "incident_date",
+        "type": "date",
+        "description": "Date of the incident",
+        "required": true
+      },
+      {
+        "name": "claim_amount",
+        "type": "number",
+        "description": "Amount claimed",
+        "required": false
+      },
+      {
+        "name": "coverage_amount",
+        "type": "number",
+        "description": "Coverage amount available",
+        "required": false
+      },
+      {
+        "name": "deductible",
+        "type": "number",
+        "description": "Deductible amount",
+        "required": false
+      },
+      {
+        "name": "claim_status",
+        "type": "string",
+        "description": "Current status of the claim",
+        "required": false
+      }
+    ]
+  },
+  "expected_extractions": {
+    "sample_complaint": {
+      "plaintiff_name": "John Doe",
+      "defendant_name": "ABC Corporation",
+      "case_number": "2023-CV-001",
+      "date_filed": "2023-01-15",
+      "court_name": "Superior Court of California",
+      "incident_date": "2022-12-01",
+      "medical_expenses": 15000,
+      "damages_sought": 50000,
+      "attorney_name": "Jane Smith",
+      "attorney_firm": "Smith & Associates Law Firm"
+    },
+    "sample_retainer": {
+      "client_name": "John Doe",
+      "attorney_name": "Jane Smith",
+      "law_firm_name": "Smith & Associates Law Firm",
+      "agreement_date": "2023-01-10",
+      "contingency_fee_percentage": 33.33,
+      "case_description": "Personal injury case from motor vehicle accident",
+      "client_signature_date": "2023-01-10",
+      "attorney_signature_date": "2023-01-10"
+    }
+  }
+}

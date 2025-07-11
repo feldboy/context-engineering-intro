@@ -1,296 +1,424 @@
-# Context Engineering Template
+# Document Analysis Agent
 
-A comprehensive template for getting started with Context Engineering - the discipline of engineering context for AI coding assistants so they have the information necessary to get the job done end to end.
+An AI-powered document analysis system for pre-settlement funding CRM, designed to extract structured data from legal documents (PDFs) using advanced language models and OCR technology.
 
-> **Context Engineering is 10x better than prompt engineering and 100x better than vibe coding.**
+## 🚀 Features
 
-## 🚀 Quick Start
+- **Multi-format PDF Support**: Handle both text-based and scanned PDF documents
+- **Intelligent Data Extraction**: Extract structured data using user-defined JSON schemas
+- **Multi-LLM Support**: Compatible with OpenAI, Anthropic, and DeepSeek models
+- **Human Verification UI**: Interactive interface for reviewing and correcting extractions
+- **Confidence Scoring**: AI-generated confidence scores for extracted data
+- **Smart Chunking**: Intelligent document segmentation for large files
+- **Caching System**: Efficient caching to avoid duplicate processing
+- **Comprehensive API**: RESTful API for integration with existing systems
 
-```bash
-# 1. Clone this template
-git clone https://github.com/coleam00/Context-Engineering-Intro.git
-cd Context-Engineering-Intro
+## 📋 Prerequisites
 
-# 2. Set up your project rules (optional - template provided)
-# Edit CLAUDE.md to add your project-specific guidelines
+- Python 3.11+
+- Node.js 16+ (for frontend development)
+- Docker and Docker Compose (optional, for containerized deployment)
+- System dependencies:
+  - Poppler (for PDF processing)
+  - Tesseract (for OCR)
 
-# 3. Add examples (highly recommended)
-# Place relevant code examples in the examples/ folder
+## 🛠️ Quick Start
 
-# 4. Create your initial feature request
-# Edit INITIAL.md with your feature requirements
-
-# 5. Generate a comprehensive PRP (Product Requirements Prompt)
-# In Claude Code, run:
-/generate-prp INITIAL.md
-
-# 6. Execute the PRP to implement your feature
-# In Claude Code, run:
-/execute-prp PRPs/your-feature-name.md
-```
-
-## 📚 Table of Contents
-
-- [What is Context Engineering?](#what-is-context-engineering)
-- [Template Structure](#template-structure)
-- [Step-by-Step Guide](#step-by-step-guide)
-- [Writing Effective INITIAL.md Files](#writing-effective-initialmd-files)
-- [The PRP Workflow](#the-prp-workflow)
-- [Using Examples Effectively](#using-examples-effectively)
-- [Best Practices](#best-practices)
-
-## What is Context Engineering?
-
-Context Engineering represents a paradigm shift from traditional prompt engineering:
-
-### Prompt Engineering vs Context Engineering
-
-**Prompt Engineering:**
-- Focuses on clever wording and specific phrasing
-- Limited to how you phrase a task
-- Like giving someone a sticky note
-
-**Context Engineering:**
-- A complete system for providing comprehensive context
-- Includes documentation, examples, rules, patterns, and validation
-- Like writing a full screenplay with all the details
-
-### Why Context Engineering Matters
-
-1. **Reduces AI Failures**: Most agent failures aren't model failures - they're context failures
-2. **Ensures Consistency**: AI follows your project patterns and conventions
-3. **Enables Complex Features**: AI can handle multi-step implementations with proper context
-4. **Self-Correcting**: Validation loops allow AI to fix its own mistakes
-
-## Template Structure
-
-```
-context-engineering-intro/
-├── .claude/
-│   ├── commands/
-│   │   ├── generate-prp.md    # Generates comprehensive PRPs
-│   │   └── execute-prp.md     # Executes PRPs to implement features
-│   └── settings.local.json    # Claude Code permissions
-├── PRPs/
-│   ├── templates/
-│   │   └── prp_base.md       # Base template for PRPs
-│   └── EXAMPLE_multi_agent_prp.md  # Example of a complete PRP
-├── examples/                  # Your code examples (critical!)
-├── CLAUDE.md                 # Global rules for AI assistant
-├── INITIAL.md               # Template for feature requests
-├── INITIAL_EXAMPLE.md       # Example feature request
-└── README.md                # This file
-```
-
-This template doesn't focus on RAG and tools with context engineering because I have a LOT more in store for that soon. ;)
-
-## Step-by-Step Guide
-
-### 1. Set Up Global Rules (CLAUDE.md)
-
-The `CLAUDE.md` file contains project-wide rules that the AI assistant will follow in every conversation. The template includes:
-
-- **Project awareness**: Reading planning docs, checking tasks
-- **Code structure**: File size limits, module organization
-- **Testing requirements**: Unit test patterns, coverage expectations
-- **Style conventions**: Language preferences, formatting rules
-- **Documentation standards**: Docstring formats, commenting practices
-
-**You can use the provided template as-is or customize it for your project.**
-
-### 2. Create Your Initial Feature Request
-
-Edit `INITIAL.md` to describe what you want to build:
-
-```markdown
-## FEATURE:
-[Describe what you want to build - be specific about functionality and requirements]
-
-## EXAMPLES:
-[List any example files in the examples/ folder and explain how they should be used]
-
-## DOCUMENTATION:
-[Include links to relevant documentation, APIs, or MCP server resources]
-
-## OTHER CONSIDERATIONS:
-[Mention any gotchas, specific requirements, or things AI assistants commonly miss]
-```
-
-**See `INITIAL_EXAMPLE.md` for a complete example.**
-
-### 3. Generate the PRP
-
-PRPs (Product Requirements Prompts) are comprehensive implementation blueprints that include:
-
-- Complete context and documentation
-- Implementation steps with validation
-- Error handling patterns
-- Test requirements
-
-They are similar to PRDs (Product Requirements Documents) but are crafted more specifically to instruct an AI coding assistant.
-
-Run in Claude Code:
-```bash
-/generate-prp INITIAL.md
-```
-
-**Note:** The slash commands are custom commands defined in `.claude/commands/`. You can view their implementation:
-- `.claude/commands/generate-prp.md` - See how it researches and creates PRPs
-- `.claude/commands/execute-prp.md` - See how it implements features from PRPs
-
-The `$ARGUMENTS` variable in these commands receives whatever you pass after the command name (e.g., `INITIAL.md` or `PRPs/your-feature.md`).
-
-This command will:
-1. Read your feature request
-2. Research the codebase for patterns
-3. Search for relevant documentation
-4. Create a comprehensive PRP in `PRPs/your-feature-name.md`
-
-### 4. Execute the PRP
-
-Once generated, execute the PRP to implement your feature:
+### Option 1: Automated Setup (Recommended)
 
 ```bash
-/execute-prp PRPs/your-feature-name.md
+# Clone the repository
+git clone <repository-url>
+cd document-analysis-agent
+
+# Run the setup script
+chmod +x setup.sh
+./setup.sh
 ```
 
-The AI coding assistant will:
-1. Read all context from the PRP
-2. Create a detailed implementation plan
-3. Execute each step with validation
-4. Run tests and fix any issues
-5. Ensure all success criteria are met
+### Option 2: Manual Setup
 
-## Writing Effective INITIAL.md Files
+1. **Install System Dependencies**
 
-### Key Sections Explained
+   On macOS:
+   ```bash
+   brew install poppler tesseract
+   ```
 
-**FEATURE**: Be specific and comprehensive
-- ❌ "Build a web scraper"
-- ✅ "Build an async web scraper using BeautifulSoup that extracts product data from e-commerce sites, handles rate limiting, and stores results in PostgreSQL"
+   On Ubuntu/Debian:
+   ```bash
+   sudo apt-get install poppler-utils tesseract-ocr tesseract-ocr-eng
+   ```
 
-**EXAMPLES**: Leverage the examples/ folder
-- Place relevant code patterns in `examples/`
-- Reference specific files and patterns to follow
-- Explain what aspects should be mimicked
+2. **Create Virtual Environment**
 
-**DOCUMENTATION**: Include all relevant resources
-- API documentation URLs
-- Library guides
-- MCP server documentation
-- Database schemas
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-**OTHER CONSIDERATIONS**: Capture important details
-- Authentication requirements
-- Rate limits or quotas
-- Common pitfalls
-- Performance requirements
+3. **Install Python Dependencies**
 
-## The PRP Workflow
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### How /generate-prp Works
+4. **Set Up Environment Variables**
 
-The command follows this process:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API keys
+   ```
 
-1. **Research Phase**
-   - Analyzes your codebase for patterns
-   - Searches for similar implementations
-   - Identifies conventions to follow
+5. **Create Required Directories**
 
-2. **Documentation Gathering**
-   - Fetches relevant API docs
-   - Includes library documentation
-   - Adds gotchas and quirks
+   ```bash
+   mkdir -p uploads cache logs credentials
+   ```
 
-3. **Blueprint Creation**
-   - Creates step-by-step implementation plan
-   - Includes validation gates
-   - Adds test requirements
+6. **Run the Application**
 
-4. **Quality Check**
-   - Scores confidence level (1-10)
-   - Ensures all context is included
-
-### How /execute-prp Works
-
-1. **Load Context**: Reads the entire PRP
-2. **Plan**: Creates detailed task list using TodoWrite
-3. **Execute**: Implements each component
-4. **Validate**: Runs tests and linting
-5. **Iterate**: Fixes any issues found
-6. **Complete**: Ensures all requirements met
-
-See `PRPs/EXAMPLE_multi_agent_prp.md` for a complete example of what gets generated.
-
-## Using Examples Effectively
-
-The `examples/` folder is **critical** for success. AI coding assistants perform much better when they can see patterns to follow.
-
-### What to Include in Examples
-
-1. **Code Structure Patterns**
-   - How you organize modules
-   - Import conventions
-   - Class/function patterns
-
-2. **Testing Patterns**
-   - Test file structure
-   - Mocking approaches
-   - Assertion styles
-
-3. **Integration Patterns**
-   - API client implementations
-   - Database connections
-   - Authentication flows
-
-4. **CLI Patterns**
-   - Argument parsing
-   - Output formatting
-   - Error handling
-
-### Example Structure
-
-```
-examples/
-├── README.md           # Explains what each example demonstrates
-├── cli.py             # CLI implementation pattern
-├── agent/             # Agent architecture patterns
-│   ├── agent.py      # Agent creation pattern
-│   ├── tools.py      # Tool implementation pattern
-│   └── providers.py  # Multi-provider pattern
-└── tests/            # Testing patterns
-    ├── test_agent.py # Unit test patterns
-    └── conftest.py   # Pytest configuration
+   ```bash
+   python main.py
+   ```
+    ├── Confidence scoring
+    ├── Human verification UI
+    └── Error handling
 ```
 
-## Best Practices
+### Data Flow
 
-### 1. Be Explicit in INITIAL.md
-- Don't assume the AI knows your preferences
-- Include specific requirements and constraints
-- Reference examples liberally
+1. **Document Upload** → Validation → Storage
+2. **Text Extraction** → PyMuPDF → OCR (if needed)
+3. **Chunking** → Legal-aware text segmentation
+4. **LLM Processing** → Structured data extraction
+5. **Post-processing** → Validation → Confidence scoring
+6. **Human Review** → Low-confidence fields flagged
+7. **Results** → Structured JSON with metadata
 
-### 2. Provide Comprehensive Examples
-- More examples = better implementations
-- Show both what to do AND what not to do
-- Include error handling patterns
+## Installation
 
-### 3. Use Validation Gates
-- PRPs include test commands that must pass
-- AI will iterate until all validations succeed
-- This ensures working code on first try
+### Prerequisites
 
-### 4. Leverage Documentation
-- Include official API docs
-- Add MCP server resources
-- Reference specific documentation sections
+- Python 3.8+
+- Tesseract OCR
+- API keys for at least one LLM provider
 
-### 5. Customize CLAUDE.md
-- Add your conventions
-- Include project-specific rules
-- Define coding standards
+### System Dependencies
+
+```bash
+# macOS
+brew install tesseract
+
+# Ubuntu/Debian
+sudo apt-get install tesseract-ocr
+
+# Windows
+# Download from: https://github.com/UB-Mannheim/tesseract/wiki
+```
+
+### Python Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Directory Setup
+
+```bash
+# Create required directories
+mkdir -p uploads storage logs credentials
+```
+
+## Configuration
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and configure:
+
+```bash
+# LLM API Keys (at least one required)
+OPENAI_API_KEY=your_openai_key_here
+ANTHROPIC_API_KEY=your_anthropic_key_here
+DEEPSEEK_API_KEY=your_deepseek_key_here
+
+# File Configuration
+PDF_UPLOAD_MAX_SIZE=50000000  # 50MB
+PDF_UPLOAD_DIR=./uploads
+PDF_STORAGE_DIR=./storage
+
+# Processing Configuration
+MAX_PAGES_DEFAULT=10
+CHUNK_SIZE_TOKENS=4000
+OCR_CONFIDENCE_THRESHOLD=0.9
+
+# Security
+SECRET_KEY=your_secret_key_here
+CORS_ORIGINS=["http://localhost:3000"]
+```
+
+### Provider Configuration
+
+The system automatically detects available LLM providers based on configured API keys:
+
+- **OpenAI**: Best for JSON mode and consistency
+- **Anthropic**: Excellent for complex reasoning
+- **DeepSeek**: Cost-effective alternative
+
+## Usage
+
+### Starting the Server
+
+```bash
+# Development
+python -m backend.api.ai_agents
+
+# Production
+uvicorn backend.api.ai_agents:app --host 0.0.0.0 --port 8000
+```
+
+### Basic Workflow
+
+1. **Upload Document**
+```bash
+curl -X POST http://localhost:8000/api/documents/upload \
+  -F "file=@sample_complaint.pdf" \
+  -F "document_type=complaint"
+```
+
+2. **Analyze Document**
+```bash
+curl -X POST http://localhost:8000/api/documents/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document_id": "sample_complaint.pdf",
+    "extraction_schema": {
+      "schema_name": "civil_complaint",
+      "fields": {
+        "case_number": null,
+        "plaintiff_name": null,
+        "defendant_names": [],
+        "filing_date": null
+      },
+      "confidence_threshold": 0.85
+    }
+  }'
+```
+
+3. **Review Results**
+```bash
+curl -X GET http://localhost:8000/api/documents/sample_complaint.pdf/status
+```
+
+### Python API Usage
+
+```python
+from backend.agents.document_analysis_agent import DocumentAnalysisAgent
+from backend.agents.models import DocumentAnalysisRequest, ExtractionSchema
+
+# Initialize agent
+agent = DocumentAnalysisAgent()
+
+# Create request
+request = DocumentAnalysisRequest(
+    document_id="sample_complaint.pdf",
+    extraction_schema=ExtractionSchema(
+        schema_name="civil_complaint",
+        fields={
+            "case_number": None,
+            "plaintiff_name": None,
+            "defendant_names": []
+        }
+    )
+)
+
+# Analyze document
+response = await agent.analyze_document(request)
+
+# Review results
+for field_name, field_data in response.extracted_data.items():
+    print(f"{field_name}: {field_data.value} (confidence: {field_data.confidence_score})")
+```
+
+## API Documentation
+
+### Endpoints
+
+#### Document Management
+- `POST /api/documents/upload` - Upload PDF document
+- `GET /api/documents` - List all documents
+- `GET /api/documents/{id}/status` - Get processing status
+- `DELETE /api/documents/{id}` - Delete document
+
+#### Analysis
+- `POST /api/documents/analyze` - Analyze document
+- `POST /api/schemas/validate` - Validate extraction schema
+
+#### System
+- `GET /api/system/info` - System information
+- `GET /health` - Health check
+- `POST /api/cache/clear` - Clear cache
+
+### Request/Response Models
+
+#### DocumentAnalysisRequest
+```json
+{
+  "document_id": "string",
+  "extraction_schema": {
+    "schema_name": "string",
+    "fields": {},
+    "confidence_threshold": 0.9
+  },
+  "process_full_document": false,
+  "force_reprocess": false
+}
+```
+
+#### DocumentAnalysisResponse
+```json
+{
+  "document_id": "string",
+  "status": "completed",
+  "extracted_data": {
+    "field_name": {
+      "value": "extracted_value",
+      "source_text": "source text from document",
+      "confidence_score": 0.95,
+      "requires_review": false
+    }
+  },
+  "metadata": {
+    "processing_method": "direct_text",
+    "processing_duration": 2.5,
+    "page_count": 5
+  },
+  "review_required_count": 1
+}
+```
+
+## Testing
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=backend --cov-report=html
+
+# Run specific test file
+pytest tests/test_document_analysis_agent.py
+
+# Run integration tests
+pytest -m integration
+```
+
+### Test Structure
+
+```
+tests/
+├── test_document_analysis_agent.py  # Main agent tests
+├── test_pdf_extractor.py           # PDF processing tests
+├── test_ocr_processor.py           # OCR tests
+├── test_text_chunker.py            # Text chunking tests
+├── test_llm_extractor.py           # LLM extraction tests
+├── test_api_endpoints.py           # API tests
+└── fixtures/                       # Test documents
+```
+
+### Validation Checklist
+
+- [ ] PDF text extraction for text-based documents
+- [ ] OCR processing for scanned documents
+- [ ] Text chunking for large documents
+- [ ] LLM extraction with confidence scoring
+- [ ] Multi-provider LLM support
+- [ ] API endpoints respond correctly
+- [ ] Error handling and edge cases
+- [ ] Performance benchmarks (<30s for 10 pages)
+- [ ] Accuracy targets (>95% on test documents)
+
+## Deployment
+
+### Docker Deployment
+
+```dockerfile
+FROM python:3.9-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy application
+COPY . /app
+WORKDIR /app
+
+# Run application
+CMD ["uvicorn", "backend.api.ai_agents:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+### Production Considerations
+
+- **Security**: Use secure API keys and HTTPS
+- **Scaling**: Consider Redis for caching, PostgreSQL for persistence
+- **Monitoring**: Add logging, metrics, and health checks
+- **Rate Limiting**: Implement rate limiting for API endpoints
+- **File Storage**: Use cloud storage for production files
+
+## Contributing
+
+### Development Setup
+
+```bash
+# Clone repository
+git clone <repository-url>
+cd context-engineering-intro
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install pre-commit hooks
+pre-commit install
+
+# Run tests
+pytest
+```
+
+### Code Quality
+
+- **Linting**: `ruff check backend/`
+- **Formatting**: `black backend/`
+- **Type Checking**: `mypy backend/`
+- **Testing**: `pytest --cov=backend/`
+
+### Submission Guidelines
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
 
 ## Resources
 
-- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
-- [Context Engineering Best Practices](https://www.philschmid.de/context-engineering)
+- [PyMuPDF Documentation](https://pymupdf.readthedocs.io/)
+- [Tesseract OCR Documentation](https://tesseract-ocr.github.io/)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [OpenAI API Documentation](https://platform.openai.com/docs)
+- [Anthropic API Documentation](https://docs.anthropic.com/)
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
