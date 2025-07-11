@@ -29,8 +29,15 @@ class LLMExtractor:
         if not self.available_providers:
             raise ValueError("No LLM providers configured. Please set API keys in environment.")
         
-        # Initialize HTTP client
-        self.client = httpx.AsyncClient(timeout=30.0)
+        # Check if we're in mock mode
+        if "mock" in self.available_providers:
+            self.use_mock = True
+        else:
+            self.use_mock = False
+        
+        # Initialize HTTP client only if not in mock mode
+        if not self.use_mock:
+            self.client = httpx.AsyncClient(timeout=30.0)
         
         # Provider configurations
         self.provider_configs = {
@@ -68,6 +75,10 @@ class LLMExtractor:
         Returns:
             Dictionary of extracted fields
         """
+        # Handle mock mode
+        if self.use_mock or provider == "mock":
+            return await self._mock_extract_structured_data(text, schema)
+        
         provider = provider or self.preferred_provider
         
         if provider not in self.available_providers:
@@ -226,6 +237,90 @@ IMPORTANT: Only extract information that is explicitly stated in the text. Do no
         result = response.json()
         return result["choices"][0]["message"]["content"]
     
+    async def _mock_extract_structured_data(
+        self, 
+        text: str, 
+        schema: Dict[str, Any]
+    ) -> Dict[str, ExtractionField]:
+        """
+        Mock extraction for testing without API keys.
+        
+        Args:
+            text: Text to extract data from
+            schema: JSON schema for extraction
+            
+        Returns:
+            Dictionary of mock extracted fields
+        """
+        logger.info("Using mock LLM extraction")
+        
+        # Simulate processing delay
+        await asyncio.sleep(0.1)
+        
+        mock_results = {}
+        
+        # Handle both dict and ExtractionSchema object
+        if hasattr(schema, 'fields'):
+            fields = schema.fields
+        elif 'fields' in schema:
+            fields = schema['fields']
+        else:
+            # Schema is directly the fields
+            fields = schema
+        
+        for field_name, field_config in fields.items():
+            field_type = field_config.get("type", "string")
+            
+            if field_type == "array":
+                # Mock array extraction based on field name
+                if "question" in field_name.lower():
+                    mock_value = [
+                        "What is the plaintiff's primary injury?",
+                        "When did the accident occur?",
+                        "What damages are being claimed?"
+                    ]
+                elif "answer" in field_name.lower():
+                    mock_value = [
+                        "The plaintiff sustained a herniated disc in the lower back.",
+                        "The accident occurred on March 15, 2023.",
+                        "The plaintiff claims $50,000 in medical expenses and $25,000 in lost wages."
+                    ]
+                elif "topic" in field_name.lower():
+                    mock_value = ["Medical injuries", "Accident details", "Financial damages"]
+                elif "number" in field_name.lower():
+                    mock_value = ["1", "2", "3"]
+                else:
+                    mock_value = ["Mock item 1", "Mock item 2", "Mock item 3"]
+            
+            elif field_type == "string":
+                # Mock string extraction based on field name
+                if "date" in field_name.lower():
+                    mock_value = "March 15, 2023"
+                elif "name" in field_name.lower():
+                    mock_value = "John Doe"
+                elif "amount" in field_name.lower() or "damage" in field_name.lower():
+                    mock_value = "$75,000"
+                else:
+                    mock_value = f"Mock {field_name}"
+            
+            elif field_type == "number":
+                mock_value = 123.45
+            
+            elif field_type == "boolean":
+                mock_value = True
+            
+            else:
+                mock_value = f"Mock {field_name}"
+            
+            mock_results[field_name] = ExtractionField(
+                value=mock_value,
+                source_text=f"Mock source text for {field_name}",
+                confidence_score=0.85,
+                field_type=field_type
+            )
+        
+        return mock_results
+
     def _parse_llm_response(self, response: str, schema: Dict[str, Any]) -> Dict[str, ExtractionField]:
         """
         Parse and validate LLM response.
@@ -333,4 +428,5 @@ IMPORTANT: Only extract information that is explicitly stated in the text. Do no
     
     async def close(self):
         """Close the HTTP client."""
-        await self.client.aclose()
+        if hasattr(self, 'client') and self.client:
+            await self.client.aclose()

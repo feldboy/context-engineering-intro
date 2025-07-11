@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from typing import List, Optional
 import aiofiles
 import os
@@ -18,6 +18,7 @@ from ..agents.models import (
     DocumentType
 )
 from .dependencies import get_document_analysis_agent
+from .pdf_routes import router as pdf_router
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include PDF processing routes
+app.include_router(pdf_router)
 
 # Global agent instance (in production, use dependency injection)
 agent = DocumentAnalysisAgent()
@@ -418,6 +422,142 @@ async def match_questions_answers(request: QAMatchRequest):
         answers_data = answers_result.extracted_data
         
         # Parse the extracted arrays
+        questions = []
+        answers = []
+        
+        if "questions" in questions_data and questions_data["questions"].value:
+            # Handle both string and list formats
+            if isinstance(questions_data["questions"].value, str):
+                questions = [q.strip() for q in questions_data["questions"].value.split('\n') if q.strip()]
+            else:
+                questions = questions_data["questions"].value
+                
+        if "answers" in answers_data and answers_data["answers"].value:
+            if isinstance(answers_data["answers"].value, str):
+                answers = [a.strip() for a in answers_data["answers"].value.split('\n') if a.strip()]
+            else:
+                answers = answers_data["answers"].value
+        
+        # Simple matching algorithm - match by position or content similarity
+        matched_qa = []
+        unmatched_questions = []
+        unmatched_answers = []
+        
+        # Match by position first (assuming same order)
+        max_pairs = min(len(questions), len(answers))
+        
+        for i in range(max_pairs):
+            question = questions[i]
+            answer = answers[i]
+            
+            # Calculate a simple confidence based on length and content
+            question_confidence = min(1.0, len(question) / 50)  # Longer questions get higher confidence
+            match_confidence = 0.9 if i < max_pairs else 0.5  # Position-based matching gets high confidence
+            
+            matched_qa.append({
+                "question_number": i + 1,
+                "question": question,
+                "answer": answer,
+                "question_confidence": question_confidence,
+                "match_confidence": match_confidence
+            })
+        
+        # Add unmatched items
+        if len(questions) > max_pairs:
+            unmatched_questions = questions[max_pairs:]
+            
+        if len(answers) > max_pairs:
+            unmatched_answers = answers[max_pairs:]
+        
+        response_data = {
+            "status": "success",
+            "total_questions": len(questions),
+            "total_answers": len(answers),
+            "matched_pairs": len(matched_qa),
+            "matched_qa": matched_qa,
+            "unmatched_questions": unmatched_questions,
+            "unmatched_answers": unmatched_answers,
+            "processing_details": {
+                "questions_processing_time": questions_result.metadata.processing_duration,
+                "answers_processing_time": answers_result.metadata.processing_duration,
+                "questions_confidence": questions_data.get("questions", {}).confidence_score if "questions" in questions_data else 0,
+                "answers_confidence": answers_data.get("answers", {}).confidence_score if "answers" in answers_data else 0
+            },
+            "questions_document_path": str(Path(settings.pdf_storage_dir) / request.questions_document),
+            "can_generate_pdf": True
+        }
+        
+        return response_data
+        
+    except Exception as e:
+        logger.error(f"Error matching Q&A: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Q&A matching failed: {str(e)}")
+
+
+@app.post("/api/documents/generate-filled-pdf")
+async def generate_filled_pdf(request: QAMatchRequest):
+    """Generate a PDF with questions filled with answers."""
+    try:
+        logger.info(f"Generating filled PDF for: {request.questions_document}")
+        
+        # First, get the matched Q&A data
+        qa_response = await match_questions_answers(request)
+        
+        # Get the questions document path
+        questions_pdf_path = Path(settings.pdf_storage_dir) / request.questions_document
+        
+        if not questions_pdf_path.exists():
+            raise HTTPException(status_code=404, detail="Questions document not found")
+        
+        # Import PDF processing tools
+        from ..tools.pdf_form_analyzer import PDFFormAnalyzer
+        from ..tools.pdf_fill_service import PDFFillerService, AnswerData
+        from ..tools.coordinate_mapper import CoordinateMapper
+        
+        # Initialize services
+        form_analyzer = PDFFormAnalyzer()
+        pdf_filler = PDFFillerService()
+        coordinate_mapper = CoordinateMapper()
+        
+        # Analyze the PDF form structure
+        form_structure = await form_analyzer.analyze_pdf_form(str(questions_pdf_path))
+        
+        # Convert matched Q&A to AnswerData objects
+        answer_objects = []
+        for qa_pair in qa_response["matched_qa"]:
+            answer_obj = AnswerData(
+                question_id=str(qa_pair["question_number"]),
+                answer_text=qa_pair["answer"],
+                confidence=qa_pair["match_confidence"],
+                source_text=qa_pair["question"]
+            )
+            answer_objects.append(answer_obj)
+        
+        # Create output filename
+        base_name = Path(request.questions_document).stem
+        output_filename = f"{base_name}_completed.pdf"
+        
+        # Create temporary output file
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as output_file:
+            output_path = output_file.name
+        
+        # Fill the PDF
+        filled_pdf_path = await pdf_filler.fill_pdf_with_answers(
+            str(questions_pdf_path), form_structure, answer_objects, output_path
+        )
+        
+        # Return the filled PDF
+        return FileResponse(
+            path=filled_pdf_path,
+            filename=output_filename,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={output_filename}"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error generating filled PDF: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
         questions = []
         answers = []
         

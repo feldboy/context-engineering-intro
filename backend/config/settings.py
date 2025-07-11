@@ -16,7 +16,8 @@ class Settings(BaseSettings):
     debug: bool = False
     env: str = "production"
     
-    # LLM API Keys
+    # LLM Configuration
+    use_mock_llm: bool = False
     openai_api_key: Optional[str] = None
     anthropic_api_key: Optional[str] = None
     deepseek_api_key: Optional[str] = None
@@ -60,13 +61,21 @@ class Settings(BaseSettings):
     @property
     def available_llm_providers(self) -> List[str]:
         """Return list of available LLM providers based on configured API keys."""
+        if self.use_mock_llm:
+            return ["mock"]
+        
         providers = []
-        if self.openai_api_key:
+        if self.openai_api_key and self.openai_api_key != "your_openai_api_key_here":
             providers.append("openai")
-        if self.anthropic_api_key:
+        if self.anthropic_api_key and self.anthropic_api_key != "your_anthropic_api_key_here":
             providers.append("anthropic")
-        if self.deepseek_api_key:
+        if self.deepseek_api_key and self.deepseek_api_key != "your_deepseek_api_key_here":
             providers.append("deepseek")
+        
+        # If no valid providers, fallback to mock mode
+        if not providers:
+            return ["mock"]
+        
         return providers
 
 

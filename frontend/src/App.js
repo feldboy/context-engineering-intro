@@ -60,7 +60,7 @@ const App = () => {
         }
       }));
 
-      const questionsUploadResponse = await fetch('/api/documents/upload', {
+      const questionsUploadResponse = await fetch('http://localhost:8000/api/documents/upload', {
         method: 'POST',
         body: questionsFormData
       });
@@ -68,6 +68,8 @@ const App = () => {
       if (!questionsUploadResponse.ok) {
         throw new Error('Failed to upload questions document');
       }
+
+      const questionsUploadData = await questionsUploadResponse.json();
 
       // Upload and analyze the answers document
       const answersFormData = new FormData();
@@ -90,7 +92,7 @@ const App = () => {
         }
       }));
 
-      const answersUploadResponse = await fetch('/api/documents/upload', {
+      const answersUploadResponse = await fetch('http://localhost:8000/api/documents/upload', {
         method: 'POST',
         body: answersFormData
       });
@@ -99,15 +101,17 @@ const App = () => {
         throw new Error('Failed to upload answers document');
       }
 
-      // Now match questions with answers
-      const matchingResponse = await fetch('/api/documents/match-qa', {
+      const answersUploadData = await answersUploadResponse.json();
+
+      // Now match questions with answers using the document IDs
+      const matchingResponse = await fetch('http://localhost:8000/api/documents/match-qa', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          questions_document: questionsFile.name,
-          answers_document: answersFile.name
+          questions_document: questionsUploadData.document_id,
+          answers_document: answersUploadData.document_id
         })
       });
 
@@ -120,6 +124,86 @@ const App = () => {
 
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const downloadFilledPDF = async () => {
+    if (!results || !results.can_generate_pdf) {
+      setError('No results available for PDF generation');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      
+      // Generate PDF with answers filled in
+      const formData = new FormData();
+      formData.append('questions_file', questionsFile);
+      formData.append('answers_data', JSON.stringify(results));
+      
+      const response = await fetch('http://localhost:8000/api/pdf/generate-qa-pdf', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      // Download the PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${questionsFile.name.replace('.pdf', '')}_completed.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+    } catch (err) {
+      setError(`PDF generation failed: ${err.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const downloadSummaryPDF = async () => {
+    if (!results) {
+      setError('No results available for summary generation');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      
+      const response = await fetch('http://localhost:8000/api/pdf/create-answer-summary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `answers_data=${encodeURIComponent(JSON.stringify(results))}`
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate summary PDF');
+      }
+
+      // Download the summary PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'qa_summary.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+    } catch (err) {
+      setError(`Summary PDF generation failed: ${err.message}`);
     } finally {
       setIsProcessing(false);
     }
@@ -272,6 +356,24 @@ const App = () => {
                 ))}
               </div>
             )}
+
+            <div className="download-section">
+              <h3>📥 Download Options</h3>
+              <button
+                onClick={downloadFilledPDF}
+                disabled={!results || !results.can_generate_pdf || isProcessing}
+                className="download-button"
+              >
+                {isProcessing ? '🔄 Generating PDF...' : '📄 Download Filled PDF'}
+              </button>
+              <button
+                onClick={downloadSummaryPDF}
+                disabled={!results || isProcessing}
+                className="download-button"
+              >
+                {isProcessing ? '🔄 Generating Summary PDF...' : '📊 Download Summary PDF'}
+              </button>
+            </div>
           </div>
         )}
       </main>
